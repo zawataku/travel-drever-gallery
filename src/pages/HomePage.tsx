@@ -1,6 +1,15 @@
-import React, { useState, useMemo } from 'react';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
-import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+    collection,
+    query,
+    orderBy,
+    Timestamp,
+    limit,
+    startAfter,
+    getDocs,
+    where,
+    DocumentSnapshot
+} from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import Modal from '../components/Modal';
 import LazyImage from '../components/LazyImage';
@@ -15,49 +24,101 @@ interface Photo {
     createdAt: Timestamp;
 }
 
-const HomePage: React.FC = () => {
+const PHOTOS_PER_PAGE = 5;
 
-    const photosCollection = collection(db, 'photos');
-    const q = query(photosCollection, orderBy('createdAt', 'desc'));
-    const [allPhotos, loading, error] = useCollectionData<Photo>(q, { idField: 'id' });
+const HomePage: React.FC = () => {
+    const [photos, setPhotos] = useState<Photo[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
+    const [hasMore, setHasMore] = useState(true);
     const [selectedLocation, setSelectedLocation] = useState<string>('all');
     const [modalPhoto, setModalPhoto] = useState<Photo | null>(null);
 
-    const filteredPhotos = useMemo(() => {
-        if (!allPhotos) return [];
-        if (selectedLocation === 'all') {
-            return allPhotos;
+    const [locationsList, setLocationsList] = useState<string[]>(['all']);
+
+    useEffect(() => {
+        const fetchAllLocations = async () => {
+            try {
+                const photosCollection = collection(db, 'photos');
+                const q = query(photosCollection);
+                const querySnapshot = await getDocs(q);
+
+                const allLocations = querySnapshot.docs.map(doc => doc.data().location as string);
+                const uniqueLocations = ['all', ...Array.from(new Set(allLocations))];
+
+                setLocationsList(uniqueLocations);
+            } catch (err) {
+                console.error("場所リストの取得に失敗:", err);
+            }
+        };
+        fetchAllLocations();
+    }, []);
+
+    const fetchPhotos = useCallback(async (location: string, cursor: DocumentSnapshot | null = null) => {
+
+        const isPaginationMode = location === 'all';
+
+        if (cursor) {
+            setLoadingMore(true);
+        } else {
+            setLoading(true);
+            setPhotos([]);
         }
-        return allPhotos.filter(photo => photo.location === selectedLocation);
-    }, [allPhotos, selectedLocation]);
 
-    const randomPhotos = useMemo(() => {
-        if (!allPhotos) return [];
-        return [...allPhotos].sort(() => 0.5 - Math.random()).slice(0, 8);
-    }, [allPhotos]);
+        const photosCollection = collection(db, 'photos');
+        let q = query(photosCollection, orderBy('createdAt', 'desc'));
 
-    const displayPhotos = selectedLocation === 'all' ? randomPhotos : filteredPhotos;
+        if (isPaginationMode) {
+            if (cursor) {
+                q = query(q, startAfter(cursor));
+            }
+            q = query(q, limit(PHOTOS_PER_PAGE));
+            setHasMore(true);
+        } else {
+            q = query(q, where('location', '==', location));
+            setHasMore(false);
+            setLastVisible(null);
+        }
 
-    const locations = useMemo(() => {
-        if (!allPhotos) return [];
-        return ['all', ...Array.from(new Set(allPhotos.map(p => p.location)))];
-    }, [allPhotos]);
+        try {
+            const querySnapshot = await getDocs(q);
+            const newPhotos = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Photo));
 
-    if (loading) {
+            if (isPaginationMode) {
+                setPhotos(prevPhotos => cursor ? [...prevPhotos, ...newPhotos] : newPhotos);
+
+                const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+                setLastVisible(lastDoc);
+
+                if (querySnapshot.docs.length < PHOTOS_PER_PAGE) {
+                    setHasMore(false);
+                }
+            } else {
+                setPhotos(newPhotos);
+            }
+
+        } catch (err) {
+            console.error("Firestore query error:", err);
+            setPhotos([]);
+            setHasMore(false);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    }, []);
+    useEffect(() => {
+        fetchPhotos(selectedLocation, null);
+    }, [selectedLocation, fetchPhotos]);
+
+    if (loading && photos.length === 0) {
         return (
-            <div className='py-6 px-2 md:px-6 flex flex-col items-center'>
-                <div className='flex flex-col md:flex-row'>
+            <div className='py-6 px-2 md:px-6 flex flex-col items-center gap-10 text-neutral-800'>
+                <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
                     <h2>旅するドリバーぬい写真展</h2>
-                    <div>
-                        <label>撮影地で絞り込む: </label>
-                        <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
-                            {locations.map(loc => (
-                                <option key={loc} value={loc}>
-                                    {loc === 'all' ? 'すべて' : loc}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
                 </div>
                 <div className='flex justify-center items-center h-[80vh]'>
                     <DotSpinner size="60" speed="1.75" color="#737373" />
@@ -65,33 +126,34 @@ const HomePage: React.FC = () => {
             </div>
         )
     }
-    if (error) return <p>Error: {error.message}</p>;
 
     return (
         <div className='py-6 px-2 md:px-6 flex flex-col items-center gap-12 text-neutral-800'>
             <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
                 <h2>旅するドリバーぬい写真展</h2>
-                <div>
-                    <label>撮影地で絞り込む: </label>
-                    <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
-                        {locations.map(loc => (
-                            <option key={loc} value={loc}>
-                                {loc === 'all' ? 'すべて' : loc}
-                            </option>
-                        ))}
-                    </select>
-                </div>
             </div>
 
-            <div className='max-w-6xl flex flex-col items-center justify-center gap-2 px-3'>
+            <div className='max-w-4xl flex flex-col items-center justify-center gap-2 px-3'>
                 <h3 className='text-2xl md:text-3xl font-semibold'>- このサイトについて -</h3>
-                <p className='text-base'>
+                <p className='text-sm md:text-base'>
                     金沢工業大学の公式マスコット、「ドリバーくん」のぬいぐるみと日本全国を旅している写真を集めました。<br />
                     新しい旅に出たら随時写真を更新していきます。
                 </p>
             </div>
-            <div className='max-w-6xl columns-2 lg:columns-3 gap-3 lg:gap-6'>
-                {displayPhotos && displayPhotos.map(photo => (
+
+            <div>
+                <label>撮影地で絞り込む: </label>
+                <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
+                    {locationsList.map(loc => (
+                        <option key={loc} value={loc}>
+                            {loc === 'all' ? 'すべて' : loc}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className='max-w-4xl columns-2 lg:columns-3 gap-3 lg:gap-6'>
+                {photos.map(photo => (
                     <LazyImage
                         key={photo.id}
                         src={photo.imageUrl}
@@ -101,6 +163,33 @@ const HomePage: React.FC = () => {
                     />
                 ))}
             </div>
+
+            <div className="flex justify-center items-center">
+                {hasMore && !loadingMore && (
+                    <button
+                        onClick={() => fetchPhotos(selectedLocation, lastVisible)}
+                        className="bg-neutral-700 text-white px-6 py-3 rounded-full cursor-pointer"
+                    >
+                        もっと読み込む
+                    </button>
+                )}
+                {loadingMore && (
+                    <DotSpinner size="50" speed="1.75" color="#737373" />
+                )}
+                {!hasMore && photos.length > 0 && selectedLocation !== 'all' && (
+                    <p className="text-neutral-500">{selectedLocation}の写真は以上です</p>
+                )}
+                {!hasMore && photos.length > 0 && selectedLocation === 'all' && (
+                    <p className="text-neutral-500">これ以上写真はありません</p>
+                )}
+                {photos.length === 0 && !loading && (
+                    <p className="text-neutral-500">この場所の写真はありません</p>
+                )}
+            </div>
+            <hr className="max-w-4xl w-full my-8 border-neutral-400" />
+            <p className='text-sm md:text-base text-neutral-400'>
+                ※このWebサイトはファンが個人で制作したものであり、金沢工業大学とは一切関係ありません。
+            </p>
 
             {modalPhoto && (
                 <Modal photo={modalPhoto} onClose={() => setModalPhoto(null)} />

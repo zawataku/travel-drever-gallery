@@ -28,7 +28,7 @@ const Modal: React.FC<Props> = ({ photo, onClose }) => {
             onClick={handleBackdropClick}
         >
             <div className="bg-white rounded-lg p-5 md:p-6 shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col text-center">
-                <div className="relative flex items-center justify-center bg-gray-100 rounded-md min-h-[200px] max-h-[calc(80vh-100px)] w-full overflow-hidden">
+                <div className="relative flex items-center justify-center bg-neutral-100 rounded-md min-h-[200px] max-h-[calc(80vh-100px)] w-full overflow-hidden">
 
                     {!isLoaded && (
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -47,16 +47,16 @@ const Modal: React.FC<Props> = ({ photo, onClose }) => {
                     />
                 </div>
 
-                <p className="mt-4 text-lg text-gray-800">
+                <p className="mt-4 text-base md:text-lg text-neutral-800">
                     {photo.comment}
                 </p>
-                <p className="mt-1 text-sm text-gray-500">
-                    ({photo.location})
+                <p className="mt-3 text-sm text-neutral-500">
+                    撮影地：{photo.location}
                 </p>
 
                 <button
                     onClick={onClose}
-                    className="mt-4 w-full bg-sky-700 text-white py-2 px-4 rounded-md hover:bg-sky-800 transition-colors cursor-pointer"
+                    className="mt-4 bg-neutral-700 text-white px-6 py-3 rounded-full cursor-pointer"
                 >
                     閉じる
                 </button>
