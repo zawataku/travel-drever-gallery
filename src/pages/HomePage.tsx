@@ -116,9 +116,9 @@ const HomePage: React.FC = () => {
 
     if (loading && photos.length === 0) {
         return (
-            <div className='py-6 px-2 md:px-6 flex flex-col items-center gap-10 text-neutral-800'>
+            <div className='py-6 px-2 md:px-6 flex flex-col items-center gap-7 text-neutral-800'>
                 <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
-                    <h2>旅するドリバーぬい写真展</h2>
+                    <h2>旅するドリバーぬい</h2>
                 </div>
                 <div className='flex justify-center items-center h-[80vh]'>
                     <DotSpinner size="60" speed="1.75" color="#737373" />
@@ -128,31 +128,43 @@ const HomePage: React.FC = () => {
     }
 
     return (
-        <div className='py-6 px-2 md:px-6 flex flex-col items-center gap-12 text-neutral-800'>
+        <div className='max-w-4xl py-6 px-2 md:px-6 flex flex-col items-center gap-7 text-neutral-800'>
             <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
-                <h2>旅するドリバーぬい写真展</h2>
+                <h2>旅するドリバーぬい</h2>
             </div>
 
-            <div className='max-w-4xl flex flex-col items-center justify-center gap-2 px-3'>
-                <h3 className='text-2xl md:text-3xl font-semibold'>- このサイトについて -</h3>
+            <div className='flex flex-col items-center justify-center gap-4 px-3'>
+                <h3 className='text-2xl md:text-3xl font-semibold'>～このサイトについて～</h3>
                 <p className='text-sm md:text-base'>
-                    金沢工業大学の公式マスコット、「ドリバーくん」のぬいぐるみと日本全国を旅している写真を集めました。<br />
+                    金沢工業大学の公式マスコット「ドリバーくん」のぬいぐるみと日本全国を旅している写真を集めました。<br />
                     新しい旅に出たら随時写真を更新していきます。
                 </p>
             </div>
 
-            <div>
-                <label>撮影地で絞り込む: </label>
-                <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
+            <hr className="w-full my-3 border-neutral-400" />
+
+            <div className="w-full flex items-center justify-center gap-3">
+                <label
+                    htmlFor="location-select"
+                    className="text-sm font-medium text-neutral-600"
+                >
+                    撮影地で絞り込む:
+                </label>
+                <select
+                    id="location-select"
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    className="block w-auto px-4 py-2 text-base text-neutral-900 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 cursor-pointer"
+                >
                     {locationsList.map(loc => (
-                        <option key={loc} value={loc}>
+                        <option key={loc} value={loc} className="text-neutral-900">
                             {loc === 'all' ? 'すべて' : loc}
                         </option>
                     ))}
                 </select>
             </div>
 
-            <div className='max-w-4xl columns-2 lg:columns-3 gap-3 lg:gap-6'>
+            <div className='columns-2 lg:columns-3 gap-3 lg:gap-6'>
                 {photos.map(photo => (
                     <LazyImage
                         key={photo.id}
@@ -176,7 +188,7 @@ const HomePage: React.FC = () => {
                 {loadingMore && (
                     <DotSpinner size="50" speed="1.75" color="#737373" />
                 )}
-                {!hasMore && photos.length > 0 && selectedLocation !== 'all' && (
+                {/* {!hasMore && photos.length > 0 && selectedLocation !== 'all' && (
                     <p className="text-neutral-500">{selectedLocation}の写真は以上です</p>
                 )}
                 {!hasMore && photos.length > 0 && selectedLocation === 'all' && (
@@ -184,9 +196,9 @@ const HomePage: React.FC = () => {
                 )}
                 {photos.length === 0 && !loading && (
                     <p className="text-neutral-500">この場所の写真はありません</p>
-                )}
+                )} */}
             </div>
-            <hr className="max-w-4xl w-full my-8 border-neutral-400" />
+            <hr className="w-full my-8 border-neutral-400" />
             <p className='text-sm md:text-base text-neutral-400'>
                 ※このWebサイトはファンが個人で制作したものであり、金沢工業大学とは一切関係ありません。
             </p>

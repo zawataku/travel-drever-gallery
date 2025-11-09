@@ -47,10 +47,10 @@ const Modal: React.FC<Props> = ({ photo, onClose }) => {
                     />
                 </div>
 
-                <p className="mt-4 text-base md:text-lg text-neutral-800">
+                <p className="mt-4 text-sm md:text-lg text-neutral-800">
                     {photo.comment}
                 </p>
-                <p className="mt-3 text-sm text-neutral-500">
+                <p className="mt-3 text-[0.75rem] md:text-base text-neutral-500">
                     撮影地：{photo.location}
                 </p>
 

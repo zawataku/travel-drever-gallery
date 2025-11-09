@@ -22,8 +22,8 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className='flex p-2 md:p-3 flex-col justify-center items-center min-h-screen'>
-            <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg mx-auto p-6 md:p-10">
+        <div className='max-w-2xl w-full flex p-2 md:p-3 flex-col justify-center items-center min-h-screen'>
+            <div className="w-full bg-white rounded-lg shadow-lg mx-auto p-6 md:p-10">
                 <h2 className="text-2xl font-bold">管理者ログイン</h2>
                 <hr className="my-4 border-neutral-200" />
                 <form onSubmit={handleLogin} className="space-y-6">

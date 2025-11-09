@@ -6,7 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <main className='min-h-screen w-full bg-neutral-50 bg-[linear-gradient(to_right,#ECF0F1_1px,transparent_1px),linear-gradient(to_bottom,#ECF0F1_1px,transparent_1px)] bg-size-[80px_80px] bg-fixed'>
+    <main className='min-h-screen w-full flex justify-center bg-neutral-50 bg-[linear-gradient(to_right,#ECF0F1_1px,transparent_1px),linear-gradient(to_bottom,#ECF0F1_1px,transparent_1px)] bg-size-[80px_80px] bg-fixed'>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />

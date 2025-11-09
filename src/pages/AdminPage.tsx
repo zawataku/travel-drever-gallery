@@ -58,13 +58,21 @@ const AdminPage: React.FC = () => {
             setFile(null);
             setComment('');
             setLocation('');
+            (e.target as HTMLFormElement).reset();
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
-            if (err.code === 'storage/unauthorized') {
-                setMessage('エラー: アップロードする権限がありません。');
+
+            if (err instanceof Error) {
+                const error = err as Error & { code?: string };
+
+                if (error.code === 'storage/unauthorized') {
+                    setMessage('エラー: アップロードする権限がありません。');
+                } else {
+                    setMessage(`エラー: ${error.message || 'アップロードに失敗しました。'}`);
+                }
             } else {
-                setMessage(`エラー: ${err.message || 'アップロードに失敗しました。'}`);
+                setMessage(`エラー: ${String(err) || 'アップロードに失敗しました。'}`);
             }
         } finally {
             setLoading(false);
