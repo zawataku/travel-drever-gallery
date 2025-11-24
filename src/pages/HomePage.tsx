@@ -116,10 +116,10 @@ const HomePage: React.FC = () => {
 
     if (loading && photos.length === 0) {
         return (
-            <div className='py-6 px-2 md:px-6 flex flex-col items-center gap-7 text-neutral-800'>
-                <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
+            <div className='py-12 px-2 md:px-6 flex flex-col items-center gap-7 text-neutral-800'>
+                {/* <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
                     <h2>旅するドリバーぬい</h2>
-                </div>
+                </div> */}
                 <div className='flex justify-center items-center h-[80vh]'>
                     <DotSpinner size="60" speed="1.75" color="#737373" />
                 </div>
@@ -128,10 +128,10 @@ const HomePage: React.FC = () => {
     }
 
     return (
-        <div className='max-w-4xl py-6 px-2 md:px-6 flex flex-col items-center gap-7 text-neutral-800'>
-            <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
+        <div className='max-w-4xl py-12 px-2 md:px-6 flex flex-col items-center gap-7 text-neutral-800'>
+            {/* <div className='flex flex-col md:flex-row gap-0 md:gap-4'>
                 <h2>旅するドリバーぬい</h2>
-            </div>
+            </div> */}
 
             <div className='flex flex-col items-center justify-center gap-4 px-3'>
                 <h3 className='text-2xl md:text-3xl font-semibold'>～このサイトについて～</h3>

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth);
+    const [signInWithEmailAndPassword, , loading, error] = useSignInWithEmailAndPassword(auth);
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
